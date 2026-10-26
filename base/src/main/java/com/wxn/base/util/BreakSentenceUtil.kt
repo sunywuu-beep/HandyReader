@@ -8,7 +8,7 @@ import android.icu.text.BreakIterator as IcuBreakIterator
 
 object BreakSentenceUtil {
 
-    const val MAX_SENTENCE_LENGTH_CJK = 40      // 中文/日文/韩文
+    const val MAX_SENTENCE_LENGTH_CJK = 80      // 中文/日文/韩文 (由40放宽至80，保留复合长句完整韵律与连贯呼吸)
     const val MAX_SENTENCE_LENGTH_DEFAULT = 100 // 英文/欧洲/阿拉伯等
 
     private const val MIN_SENTENCE_LENGTH_CJK = 3

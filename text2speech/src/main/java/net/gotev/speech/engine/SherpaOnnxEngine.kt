@@ -245,6 +245,7 @@ class SherpaOnnxEngine constructor(
         ruleFars = null
         lexicon = null
         dataDir = null
+        var dictDir: String? = null
 
         //---------------------------------------------------------------------------
         setTextToSpeechSpeakerIndex(engineModelConfig.speaker)
@@ -318,6 +319,15 @@ class SherpaOnnxEngine constructor(
             }
             lexicon = lexicons.toString()
             ruleFsts = fsts.toString()
+
+            val dictFile = File(engineModelDir, "dict")
+            if (dictFile.exists()) {
+                dictDir = dictFile.absolutePath
+            }
+            val espeakFile = File(engineModelDir, "espeak-ng-data")
+            if (espeakFile.exists() && (dataDir == null || dataDir.isEmpty())) {
+                dataDir = espeakFile.absolutePath
+            }
         }
 
         if (!SherpaOnnxDeviceChecker.isDeviceSupported(context)) {
@@ -338,7 +348,7 @@ class SherpaOnnxEngine constructor(
                 voices = voices ?: "",
                 lexicon = lexicon ?: "",
                 dataDir = dataDir ?: "",
-                dictDir = "",
+                dictDir = dictDir ?: "",
                 ruleFsts = ruleFsts ?: "",
                 ruleFars = ruleFars ?: "",
                 numThreads = numThreads,

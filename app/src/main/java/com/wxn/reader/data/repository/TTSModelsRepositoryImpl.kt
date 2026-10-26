@@ -116,10 +116,10 @@ class TTSModelsRepositoryImpl @Inject constructor(
         }
         return TTSModelData(
             name = modelId,
-            url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_1.tar.bz2",
+            url = "https://github.com/sunywuu-beep/HandyReader/releases/download/v-debug-test/kokoro-int8-multi-lang-v1_1.zip",
             type = "kokoro",
             locale = "zh-CN",
-            size = "168MB",
+            size = "139MB",
             base = emptyList(),
             processSpeed = 2.5f,
             quality = 4.8f,

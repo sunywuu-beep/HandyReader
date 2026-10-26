@@ -88,8 +88,10 @@ class BreakParagraphUtilTest {
     }
 
     @Test
-    fun normalizeForTts_trailingPunctuation_stripped() {
-        assertEquals("Hello", normalizeForTts("Hello.\""))
+    fun normalizeForTts_trailingPunctuation_preserved() {
+        assertEquals("Hello.", normalizeForTts("Hello.\""))
+        assertEquals("你好吗？", normalizeForTts("“你好吗？”"))
+        assertEquals("这很好！", normalizeForTts("这很好！*"))
     }
 
     @Test
