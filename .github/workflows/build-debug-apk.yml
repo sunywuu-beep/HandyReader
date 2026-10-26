@@ -101,6 +101,10 @@ jobs:
             git clone --depth 1 --branch v3.0.0 https://github.com/Tehreer/SheenBidi.git bookread/src/main/cpp/SheenBidi
           fi
 
+      - name: Run Kokoro Unit Tests
+        run: |
+          ./gradlew :app:testDebugUnitTest --tests "com.wxn.reader.data.repository.TTSModelsRepositoryKokoroTest" --stacktrace
+
       - name: Build Debug APK
         id: build_apk
         run: |
@@ -109,16 +113,21 @@ jobs:
 
       - name: Prepare Kokoro Model Zip Asset
         run: |
-          curl -L -o kokoro.tar.bz2 https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_1.tar.bz2
-          python -c "
-          import tarfile, zipfile
-          with tarfile.open('kokoro.tar.bz2', 'r:bz2') as tar:
-              with zipfile.ZipFile('kokoro-int8-multi-lang-v1_1.zip', 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=6) as z:
-                  for m in tar.getmembers():
-                      if m.isfile():
-                          z.writestr(m.name, tar.extractfile(m).read())
-          "
-          rm -f kokoro.tar.bz2
+          if [ ! -s "kokoro-int8-multi-lang-v1_1.zip" ]; then
+            curl -L -f -s -o kokoro-int8-multi-lang-v1_1.zip https://github.com/sunywuu-beep/HandyReader/releases/download/v-debug-test/kokoro-int8-multi-lang-v1_1.zip || true
+          fi
+          if [ ! -s "kokoro-int8-multi-lang-v1_1.zip" ]; then
+            curl -L -o kokoro.tar.bz2 https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_1.tar.bz2
+            python -c "
+            import tarfile, zipfile
+            with tarfile.open('kokoro.tar.bz2', 'r:bz2') as tar:
+                with zipfile.ZipFile('kokoro-int8-multi-lang-v1_1.zip', 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+                    for m in tar.getmembers():
+                        if m.isfile():
+                            z.writestr(m.name, tar.extractfile(m).read())
+            "
+            rm -f kokoro.tar.bz2
+          fi
 
       - name: Prepare Build Summary
         if: always()

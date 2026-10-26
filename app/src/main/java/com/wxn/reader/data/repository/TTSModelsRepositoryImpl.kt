@@ -31,14 +31,21 @@ class TTSModelsRepositoryImpl @Inject constructor(
         page: Int,
         pageSize: Int
     ): Result<Pair<List<TTSModelData>?, Int?>> {
+        val kokoro = createKokoroModelData("kokoro-int8-multi-lang-v1_1")
         val result = api.ttsModelsList(page, pageSize).map { response ->
-            Pair(response.data?.list, response.pagination?.totalPages)
+            val remoteList = response.data?.list.orEmpty()
+            val totalPages = response.pagination?.totalPages ?: 1
+            if (page == 1) {
+                val combined = listOf(kokoro) + remoteList.filter { it.name != kokoro.name }
+                Pair(combined, totalPages)
+            } else {
+                Pair(remoteList, totalPages)
+            }
         }
-        if (result.isSuccess && !result.getOrNull()?.first.isNullOrEmpty()) {
+        if (result.isSuccess) {
             return result
         }
         if (page == 1) {
-            val kokoro = createKokoroModelData("kokoro-int8-multi-lang-v1_1")
             return Result.success(Pair(listOf(kokoro), 1))
         }
         return result

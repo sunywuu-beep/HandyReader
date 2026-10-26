@@ -3,9 +3,11 @@ package com.wxn.reader.data.repository
 import com.wxn.reader.data.mapper.sherpamodel.SherpaModelMapper
 import com.wxn.reader.data.remote.api.TTSModelsApi
 import com.wxn.reader.data.remote.dto.BaseResponse
+import com.wxn.reader.data.remote.dto.Pagination
 import com.wxn.reader.data.source.local.AppDatabase
 import com.wxn.reader.data.source.local.dao.SherpaModelDao
 import com.wxn.reader.data.source.local.dao.SherpaSpeakerDao
+import com.wxn.reader.domain.model.TTSModelData
 import com.wxn.reader.domain.model.TTSModelsList
 import com.wxn.reader.util.download.OKHttpStringStreamer
 import kotlinx.coroutines.runBlocking
@@ -71,5 +73,65 @@ class TTSModelsRepositoryKokoroTest {
         assertEquals(1, list!!.size)
         assertEquals("kokoro-int8-multi-lang-v1_1", list[0].name)
         assertEquals("kokoro", list[0].type)
+    }
+
+    @Test
+    @Suppress("UNCHECKED_CAST")
+    fun getModels_onlineSuccess_page1_prependsKokoro() = runBlocking {
+        val remoteModel = TTSModelData(
+            name = "vits-zh-aishell3",
+            url = "http://example.com/vits.zip",
+            type = "vits",
+            locale = "zh-CN",
+            size = "70MB",
+            base = emptyList(),
+            processSpeed = 2.0f,
+            quality = 3.5f,
+            speakers_num = 1,
+            speakers = emptyList()
+        )
+        val mockResponse = mock(BaseResponse::class.java) as BaseResponse<TTSModelsList>
+        `when`(mockResponse.data).thenReturn(TTSModelsList(listOf(remoteModel)))
+        `when`(mockResponse.pagination).thenReturn(Pagination(page = 1, pageSize = 10, totalPages = 2))
+        `when`(api.ttsModelsList(1, 10)).thenReturn(Result.success(mockResponse))
+
+        val result = repository.getModels(1, 10)
+        assertTrue("远程请求成功时应返回成功", result.isSuccess)
+        val (list, pages) = result.getOrNull()!!
+        assertNotNull(list)
+        assertEquals(2, pages)
+        assertEquals(2, list!!.size)
+        assertEquals("第 1 个应为置顶的 Kokoro 模型", "kokoro-int8-multi-lang-v1_1", list[0].name)
+        assertEquals("kokoro", list[0].type)
+        assertEquals("第 2 个应为远程官方模型", "vits-zh-aishell3", list[1].name)
+    }
+
+    @Test
+    @Suppress("UNCHECKED_CAST")
+    fun getModels_onlineSuccess_page2_doesNotPrependKokoro() = runBlocking {
+        val remoteModel = TTSModelData(
+            name = "vits-en-ljspeech",
+            url = "http://example.com/vits-en.zip",
+            type = "vits",
+            locale = "en-US",
+            size = "60MB",
+            base = emptyList(),
+            processSpeed = 2.0f,
+            quality = 3.5f,
+            speakers_num = 1,
+            speakers = emptyList()
+        )
+        val mockResponse = mock(BaseResponse::class.java) as BaseResponse<TTSModelsList>
+        `when`(mockResponse.data).thenReturn(TTSModelsList(listOf(remoteModel)))
+        `when`(mockResponse.pagination).thenReturn(Pagination(page = 2, pageSize = 10, totalPages = 2))
+        `when`(api.ttsModelsList(2, 10)).thenReturn(Result.success(mockResponse))
+
+        val result = repository.getModels(2, 10)
+        assertTrue("远程请求成功时应返回成功", result.isSuccess)
+        val (list, pages) = result.getOrNull()!!
+        assertNotNull(list)
+        assertEquals(2, pages)
+        assertEquals(1, list!!.size)
+        assertEquals("第 2 页不应重复插入 Kokoro", "vits-en-ljspeech", list[0].name)
     }
 }
