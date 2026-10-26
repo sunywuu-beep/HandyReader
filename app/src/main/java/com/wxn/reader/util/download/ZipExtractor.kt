@@ -59,6 +59,11 @@ class ZipExtractor @Inject constructor() {
                 var entry: ZipEntry? = zis.nextEntry
                 while (entry != null) {
                     val destFile = File(destDir, entry.name)
+                    val canonicalDestPath = destFile.canonicalPath
+                    val canonicalDirPath = destDir.canonicalPath
+                    if (!canonicalDestPath.startsWith(canonicalDirPath + File.separator) && canonicalDestPath != canonicalDirPath) {
+                        throw SecurityException("Zip entry is outside of target directory: ${entry.name}")
+                    }
 
                     if (entry.isDirectory) {
                         destFile.mkdirs()

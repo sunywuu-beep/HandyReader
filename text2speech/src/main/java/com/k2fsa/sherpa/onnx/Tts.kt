@@ -360,6 +360,7 @@ fun getOfflineTtsConfig(
             voices = "$modelDir/$voices",
             tokens = "$modelDir/tokens.txt",
             dataDir = dataDir,
+            dictDir = dictDir,
             lexicon = when {
                 lexicon == "" -> lexicon
                 "," in lexicon -> lexicon
