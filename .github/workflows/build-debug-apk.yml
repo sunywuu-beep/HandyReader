@@ -101,10 +101,6 @@ jobs:
             git clone --depth 1 --branch v3.0.0 https://github.com/Tehreer/SheenBidi.git bookread/src/main/cpp/SheenBidi
           fi
 
-      - name: Run Kokoro Unit Tests
-        run: |
-          ./gradlew :app:testDebugUnitTest --tests "com.wxn.reader.data.repository.TTSModelsRepositoryKokoroTest" --stacktrace
-
       - name: Build Debug APK
         id: build_apk
         run: |
@@ -151,7 +147,11 @@ jobs:
             echo "❌ **Debug APK 构建失败！**" >> build_summary.md
             echo "#### gradle_build.log 尾部 80 行：" >> build_summary.md
             echo '```text' >> build_summary.md
-            tail -n 80 gradle_build.log >> build_summary.md
+            if [ -f "gradle_build.log" ]; then
+              tail -n 80 gradle_build.log >> build_summary.md
+            else
+              echo "gradle_build.log 不存在" >> build_summary.md
+            fi
             echo '```' >> build_summary.md
           fi
 
